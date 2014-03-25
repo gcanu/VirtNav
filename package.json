@@ -1,0 +1,21 @@
+{
+  "name": "vlmJS",
+  "version": "0.0.1",
+  "description": "Outil d'aide à la navigation pour simulateurs de régate",
+  "main": "gshhs.js",
+  "dependencies": {
+    "grunt": "~0.4.2"
+  },
+  "devDependencies": {
+    "grunt": "~0.4.2",
+    "grunt-contrib-uglify": "~0.3.2",
+    "grunt-contrib-jshint": "~0.8.0",
+    "grunt-contrib-watch": "~0.6.0",
+    "grunt-contrib-coffee": "~0.10.1"
+  },
+  "scripts": {
+    "test": "mocha -R spec test/*"
+  },
+  "author": "Guillaume Canu",
+  "license": "BSD-2-Clause"
+}
