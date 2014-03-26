@@ -30,27 +30,9 @@ window.VMG = (() ->
 
 
 
-    ortho = (cap, vit) -> # cap en degré
-      dist = vit / 6
-      cap = deg2rad cap
-      la = pos.boat.lat + deg2rad(dist * Math.cos(cap) / 60)
-      lm = (pos.boat.lat + la) / 2
-      ga = pos.boat.lon + deg2rad(dist * Math.sin(cap) / Math.cos(lm) / 60)
-      {lat: la, lon: ga}
-
-
-
-    loxo = (cap, vit) ->
-      dist = vit / 6
-      cap = deg2rad cap
-      la =
-      {lat: la, lon: ga}
-
-
-
     orthoAngle = () ->
       ct = Math.acos(Math.cos(pos.boat.lat)*Math.cos(pos.target.lat)*Math.cos(pos.target.lon-pos.boat.lon)+Math.sin(pos.boat.lat)*Math.sin(pos.target.lat))
-      signe = if pos.boat.lon - pos.target.lon < 0 then -1 else 1
+      signe = if pos.target.lon - pos.boat.lon < 0 then -1 else 1
       co = Math.acos((Math.sin(pos.target.lat)-Math.cos(ct)*Math.sin(pos.boat.lat))/(Math.cos(pos.boat.lat)*Math.sin(ct))) * signe
       co+Math.PI*2*((1-signe)/2)
 
@@ -71,9 +53,9 @@ window.VMG = (() ->
       if Math.abs(target_lat-lat) > deg2rad(0.001)
         ld = Math.log(Math.tan(Math.PI/4 + (lat/2)));
         la = Math.log(Math.tan(Math.PI/4 + (target_lat/2)));
-        target_lon = lon - (la-ld)*Math.tan(angle);
+        target_lon = lon + (la-ld)*Math.tan(angle);
       else
-        target_lon = lon - Math.sin(angle)*deg2rad(distance/(60.0*Math.cos(lat)));
+        target_lon = lon + Math.sin(angle)*deg2rad(distance/(60.0*Math.cos(lat)));
 
       [ dec2dms(rad2deg target_lat), dec2dms(rad2deg target_lon) ]
 
@@ -93,9 +75,12 @@ window.VMG = (() ->
 
         # calcul de l'angle du bateau au vent
         if c_angle < 0
+          360-c_angle+wa if c_angle - wa > 180
           wa_r = c_angle + 360 - wa
         else
           wa_r = c_angle - wa
+
+        wa_r = 360 - wa_r if wa_r >= 180
 
         # calcul de la vitesse
         vit = speed Math.abs(wa_r), ws
@@ -107,9 +92,15 @@ window.VMG = (() ->
           best_vit = vit_cible
           best_angle = c_angle
 
-        console.log best_angle, best_vit if i is 0
+        # affichage de l'angle bâbord amures
+        if i is 0
+          console.log best_angle, best_vit
+          best_vit = 0
+
+        # affichage de l'angle tribord amures
         console.log best_angle, best_vit if i is 90
-      console.log ortho best_angle, best_vit
+      p = getCoordFromLoxoDist pos.boat.lat, pos.boat.lon, 307, 6.5/6
+      console.log p[0], p[1]
     null
 
 
@@ -140,6 +131,7 @@ window.VMG = (() ->
       t_s = 0
 
       for angle of _polars
+        angle = angle|0;
         if t_a <= a and a <= angle
           for vit of _polars[t_a]
             if t_s <= s and s <= vit
@@ -194,14 +186,14 @@ window.VMG = (() ->
     #
     pos =
       boat:
-        lat: deg2rad dms2dec 41, 27, 28
-        lon: deg2rad dms2dec -12, -22, -41
+        lat: deg2rad dms2dec 42, 25, 34
+        lon: deg2rad dms2dec 10, 37, 27
       target:
         lat: deg2rad dms2dec 43
-        lon: deg2rad dms2dec -9, -27
+        lon: deg2rad dms2dec 9, 27
       wind:
-        angle: 288
-        speed: 3.1
+        angle: 77.2
+        speed: 9.5
 
 
     init()
