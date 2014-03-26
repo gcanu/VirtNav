@@ -65,7 +65,7 @@
         } else {
           target_lon = lon - Math.sin(angle) * deg2rad(distance / (60.0 * Math.cos(lat)));
         }
-        return console.log(dec2dms(rad2deg(target_lat)), dec2dms(rad2deg(target_lon)));
+        return [dec2dms(rad2deg(target_lat)), dec2dms(rad2deg(target_lon))];
       };
       bestAngle = function(ws, wa, side) {
         var angle, best_angle, best_vit, c_angle, i, vit, vit_cible, wa_r, _i;
@@ -168,7 +168,6 @@
         }
       };
       init();
-      getCoordFromLoxoDist(pos.boat.lat, pos.boat.lon, 259, 2.2 / 6);
       return null;
     };
   })();

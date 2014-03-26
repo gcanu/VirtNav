@@ -75,7 +75,7 @@ window.VMG = (() ->
       else
         target_lon = lon - Math.sin(angle)*deg2rad(distance/(60.0*Math.cos(lat)));
 
-      dec2dms(rad2deg target_lat), dec2dms(rad2deg target_lon)
+      [ dec2dms(rad2deg target_lat), dec2dms(rad2deg target_lon) ]
 
 
 
