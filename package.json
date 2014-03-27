@@ -6,7 +6,8 @@
   "dependencies": {
     "grunt": "~0.4.2",
     "xml-stream": "~0.4.4",
-    "node-expat": "~2.1.4"
+    "node-expat": "~2.1.4",
+    "when": "~3.0.1"
   },
   "devDependencies": {
     "grunt": "~0.4.2",
