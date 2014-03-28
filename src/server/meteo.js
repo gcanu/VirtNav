@@ -1,5 +1,5 @@
 (function() {
-  var Meteo, expat, fs, getMeteoFromFile, getMeteoFromServer, http, loadMeteo, meteo, url, whn, zlib;
+  var Meteo, expat, fs, getMeteo, getMeteoFromFile, getMeteoFromServer, http, meteo, url, whn, zlib;
 
   fs = require('fs');
 
@@ -13,48 +13,45 @@
 
   expat = require('node-expat');
 
-  meteo = {
-    url: {
-      '0': 'http://datacenter.manyplayers.com/winds/dated_1x1/50/meteo_20140326195805_0_50.xml'
-    }
-  };
+  meteo = ['http://datacenter.manyplayers.com/winds/dated_1x1/50/meteo_20140327075947_0_50.xml'];
 
   Meteo = {
     winds: []
   };
 
-  loadMeteo = function() {
-    var addr, matches, path, time, _ref, _results;
-    _ref = meteo.url;
-    _results = [];
-    for (time in _ref) {
-      addr = _ref[time];
+  getMeteo = function() {
+    var addr, matches, path, _i, _len;
+    for (_i = 0, _len = meteo.length; _i < _len; _i++) {
+      addr = meteo[_i];
       matches = addr.match(/meteo_(\d+)_\d+_\d+.?(\d+)?.xml/);
       if (matches) {
         path = './meteo/' + matches[0];
         if (fs.existsSync(path)) {
           console.log("fichier " + path + " présent");
-          _results.push(getMeteoFromFile(path));
+          getMeteoFromFile(path);
         } else {
           console.log("chargement de " + path);
-          _results.push(getMeteoFromServer(addr, path).then((function(p) {
+          getMeteoFromServer(addr, path).then((function(p) {
             console.log(p + ' enregistré avec succès');
             return getMeteoFromFile(p);
           }), (function(code) {
             return console.log("erreur " + code);
-          })));
+          }));
         }
-      } else {
-        _results.push(void 0);
       }
     }
-    return _results;
+    return Meteo.winds;
   };
 
   getMeteoFromServer = function(addr, path) {
-    var defer, req;
-    req = http.get(addr);
+    var defer, options, req;
+    options = {
+      host: "vipproxy1.prod.extelia.fr",
+      port: 8080,
+      path: addr
+    };
     defer = whn.defer();
+    req = http.get(options);
     req.on('response', function(res) {
       var out, type;
       type = res.headers['content-encoding'] || res.headers['content-type'];
@@ -103,9 +100,6 @@
           speed: (attr.V | 0) / 1.852,
           angle: attr.D
         });
-        if (Pt.x === 8 && Pt.y === 9) {
-          console.log(Meteo.winds[Meteo.winds.length - 1]);
-        }
         if (Pt.x === Meteo.rows) {
           Pt.x = 0;
           return Pt.y++;
@@ -113,9 +107,9 @@
       }
     });
     xml.write(datas);
-    return Meteo;
+    return void 0;
   };
 
-  loadMeteo();
+  exports.getMeteo = getMeteo;
 
 }).call(this);

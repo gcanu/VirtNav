@@ -5,13 +5,9 @@ url = require 'url'
 zlib = require 'zlib'
 expat = require 'node-expat'
 
-meteo =
-  url:
-    '0': 'http://datacenter.manyplayers.com/winds/dated_1x1/50/meteo_20140326195805_0_50.xml'
-    # '36': 'http://datacenter.manyplayers.com/winds/dated_1x1/50/meteo_20140326195805_0_50.36.xml'
-    # '48': 'http://datacenter.manyplayers.com/winds/dated_1x1/50/meteo_20140326195805_0_50.48.xml'
-    # '60': 'http://datacenter.manyplayers.com/winds/dated_1x1/50/meteo_20140326195805_0_50.60.xml'
-    # '72': 'http://datacenter.manyplayers.com/winds/dated_1x1/50/meteo_20140326195805_0_50.72.xml'
+meteo = [
+    'http://datacenter.manyplayers.com/winds/dated_1x1/50/meteo_20140327075947_0_50.xml'
+]
 
 Meteo =
     winds: []
@@ -21,9 +17,9 @@ Meteo =
 # localement. S'il ne sont pas disponibles, ils sont téléchargés depuis le
 # serveur distant
 #
-loadMeteo = () ->
+getMeteo = () ->
   # recherche des fichiers météos
-  for time, addr of meteo.url
+  for addr in meteo
     matches = addr.match /meteo_(\d+)_\d+_\d+.?(\d+)?.xml/
     if matches
       path = './meteo/' + matches[0]
@@ -41,22 +37,32 @@ loadMeteo = () ->
             ((code) ->
               console.log "erreur "+code
             )
+  Meteo.winds
 
 
-
+#
+# Chargement depuis le serveur distant des données météo et les stocke dans un
+# fichier
+#
 getMeteoFromServer = (addr, path) ->
-  req = http.get addr
+  options =
+    host: "vipproxy1.prod.extelia.fr"
+    port: 8080
+    path: addr
+
   defer = whn.defer()
 
+  req = http.get options
+
   req.on 'response', (res) ->
-    
+
     type = res.headers['content-encoding'] or res.headers['content-type']
 
     res.on 'end', () ->
       defer.resolve path
-    
+
     if res.statusCode isnt 404
-      
+
       if type is 'gzip' or type is 'text/xml'
         out = fs.createWriteStream path
 
@@ -82,7 +88,7 @@ getMeteoFromFile = (path) ->
     y: 0
   datas = fs.readFileSync path
   xml = new expat.Parser "UTF-8"
-  
+
   xml.on 'startElement', (el, attr) ->
     if el is 'PREVISIONS'
       Meteo.cols = attr.COLS|0
@@ -99,16 +105,11 @@ getMeteoFromFile = (path) ->
         angle: attr.D
       }
 
-      if Pt.x == 8 and Pt.y == 9
-        console.log Meteo.winds[Meteo.winds.length-1]
-
       if Pt.x is Meteo.rows
         Pt.x = 0
         Pt.y++
 
   xml.write datas
+  undefined
 
-  Meteo
-
-loadMeteo()
-#console.log Meteo
+exports.getMeteo = getMeteo
